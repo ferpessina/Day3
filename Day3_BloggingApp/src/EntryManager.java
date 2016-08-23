@@ -1,37 +1,18 @@
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class EntryManager{
 	private List<Entry> entries = new ArrayList<>();
 	private Long entryId = new Long(0);
 
-	public Long addEntry(String title,String text,Date date,String[] tags, String owner){
-		entries.add(new Entry(title, text, date, tags, this.entryId, owner));
+	public Entry addEntry(String title,String text,Date date,String[] tags, String owner){
+		Entry ret = new Entry(title, text, date, tags, this.entryId, owner);
+		entries.add(ret);
 		entryId++;
-		return entryId-1;
+		return ret;
 	}
 	
-	public void printEntriesByTag(String tag){
-		for(int i=0;i<entries.size();i++){
-			if(entries.get(entries.size()-1-i).hasTag(tag)){
-				this.printEntry(entries.size()-1-i);
-			}
-		}
-	}
-	
-	public void printEntry(int idx){
-		if(idx<entries.size()){
-			entries.get(idx).print();;
-		}
-	}
-	
-	public void deleteEntry(Long id){
-		for(int i=0;i<entries.size();i++){
-			if(id == entries.get(i).getId()){
-				entries.remove(i);
-			}
-		}
+	public void deleteEntry(Entry entry){
+		entries.remove(entry);
 	}
 	
 	public Entry getEntry(String _title){
@@ -40,14 +21,6 @@ public class EntryManager{
 			if(_title.equals(entries.get(i).getTitle())){
 				return entries.get(i);
 			}
-		}
-		return entry;
-	}
-	
-	public Entry getEntry(int idx){
-		Entry entry = null;
-		if(idx<entries.size()){
-			return entries.get(idx);
 		}
 		return entry;
 	}
@@ -65,6 +38,24 @@ public class EntryManager{
 		}
 	}
 	
+	public void printEntriesByTag(String tag){
+		entries.stream().filter(p -> p.hasTag(tag)).forEach(Entry::print);
+	}
+	
+	public void printEntriesByText(String text){
+		entries.stream().filter(p -> p.getText().equals(text)).forEach(Entry::print);
+	}
+	
+	public void printEntriesByDate(Date from, Date to){
+		if(from != null && to != null){
+			entries.stream().filter(p -> p.getDate().before(to) && p.getDate().after(from)).forEach(Entry::print);
+		}
+	}
+	
+	public void printEntriesByUsers(Set<String> users){
+		entries.stream().filter(e -> users.contains(e.getOwner())).forEach(Entry::print);
+	}
+	
 	public Entry getLastEntry(){
 		return entries.get(entries.size()-1);
 	}
@@ -78,6 +69,12 @@ public class EntryManager{
 		}
 		for(int i=0;i<n;i++){
 			this.printEntry(entries.size()-1-i);
+		}
+	}
+
+	private void printEntry(int idx){
+		if(idx<entries.size()){
+			entries.get(idx).print();
 		}
 	}
 }

@@ -1,11 +1,8 @@
-import java.util.*;
 
 public class User {
 	private Long userId;
 	private String name;
 	private String email;
-	private Set<Long> posts = new HashSet<Long>();
-	private Set<Long> groups = new HashSet<Long>();
 	
 	User(String _name, String _email, Long _id){
 		this.name = _name;
@@ -33,22 +30,7 @@ public class User {
 		this.email = _email;
 	}
 	
-	public Long[] getPostIds(){
-		return (Long[]) posts.toArray();
-	}
-	public void addPost(Long id){
-		posts.add(id);
-	}
-	public void removePost(Long id){
-		posts.remove(id);
-	}
-	public void addGroup(Long id){
-		groups.add(id);
-	}
-	public void removeGroup(Long id){
-		groups.remove(id);
-	}
-	public Long[] getGroupIds(){
-		return (Long[]) groups.toArray();
+	public void printInfo(){
+		System.out.println("Name: "+name+"\nEmail:"+email);
 	}
 }
