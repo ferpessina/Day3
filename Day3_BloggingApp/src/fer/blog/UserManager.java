@@ -1,3 +1,4 @@
+package fer.blog;
 import java.util.*;
 
 public class UserManager{

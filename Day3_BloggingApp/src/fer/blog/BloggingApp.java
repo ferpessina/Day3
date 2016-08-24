@@ -1,3 +1,4 @@
+package fer.blog;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -73,7 +74,7 @@ public class BloggingApp {
 			case "tag":
 				System.out.println("Enter tag you wish to search by...");
 				_aux = in.nextLine();
-				eManager.printEntriesByTag(_aux);
+				eManager.getEntriesByTag(_aux).stream().forEach(Entry::print);
 				break;
 			case "uinfo":
 				System.out.println("Enter user name");
@@ -90,8 +91,23 @@ public class BloggingApp {
 				_aux = in.nextLine();
 				eManager.printEntry(_aux);
 				break;
+			case "sdate":
+				System.out.println("Sorting by date");
+				eManager.sortAllByDate(true);
+				break;
+			case "stitle":
+				System.out.println("Sorting by title");
+				eManager.sortAllByTitle(true);
+				break;
+			case "sowner":
+				System.out.println("Sorting by owner");
+				eManager.sortAllByOwner(true);
+				break;
 			case "pdelete":
 				deleteEntry();
+				break;
+			case "subscribe":
+				newSub();
 				break;
 			case "gcreate":
 				createGroup(loggedUserName);
@@ -105,10 +121,13 @@ public class BloggingApp {
 				System.out.println("Enter the number of recent posts you wish to see...");
 				int n = in.nextInt();
 				in.nextLine();
-				eManager.showLastEntries(n);
+				eManager.printLastEntries(n);
 				break;
 			case "logout":
 				loggedUser = null;
+				break;
+			case "udelete":
+				deleteUser();
 				break;
 			case "groups":
 				gManager.listGroups();
@@ -129,13 +148,13 @@ public class BloggingApp {
 					to = dateFormat.parse(in.nextLine());
 					System.out.println();
 				}
-				eManager.printEntriesByDate(from, to);
+				eManager.getEntriesByDate(from, to).stream().forEach(Entry::print);
 				break;
 			case "group posts":
 				System.out.println("Enter group name:");
 				_aux = in.nextLine();
 				Set<String> members = gManager.getGroupMembers(_aux);
-				eManager.printEntriesByUsers(members);
+				eManager.getEntriesByUsers(members).stream().forEach(Entry::print);
 				break;
 			case "exit":
 				System.out.println("Exiting blog...");				
@@ -145,7 +164,7 @@ public class BloggingApp {
 		in.close();
 	}
 
-	static void createEntry(){
+	static private void createEntry(){
 		System.out.println();
 		//TODO: Check for owner existence and update/create owner data
 		System.out.println("Creating new entry...");		
@@ -157,15 +176,15 @@ public class BloggingApp {
 		Date date = new Date();
 		System.out.println("Entry date: "+dateFormat.format(date)); //2014/08/06 15:59:48
 		System.out.println("Add tags to your post:");
-		String aux = in.nextLine();
-		String[] split = aux.split("\\s+");
-		Entry entry = eManager.addEntry(title, text, date, split, loggedUser.getName());
+		String tags = in.nextLine();
+		Entry entry = eManager.addEntry(title, text, tags, loggedUser.getName());
 		uManager.addUserEntry(loggedUser, entry);
+		String[] split = tags.split("\\s+");
 		tManager.addTags(split);
 		sManager.manageNewEntry(entry, gManager, uManager);
 	}
 	
-	static void createGroup(String userName){
+	static private void createGroup(String userName){
 		System.out.println("Enter new group name:");
 		String groupName = in.nextLine();
 		Group group = gManager.getGroupByName(groupName);
@@ -190,26 +209,53 @@ public class BloggingApp {
 		}
 
 	}
-	static void deleteUser(){
+	static private void deleteUser(){
 		System.out.println("Enter the name of the user you wish to delete...");
 		String name = in.nextLine();
 		User temp = uManager.getUser(name);
 		if(temp == loggedUser){
-			
+			uManager.deleteUser(temp);
+			gManager.removeUserFromAllGroups(temp);
+			sManager.deleteUserSubs(temp);
+			loggedUser = null;
 		}else{
 			uManager.deleteUser(temp);
 			gManager.removeUserFromAllGroups(temp);
-			
+			sManager.deleteUserSubs(temp);
+
 		}
 	}
 	
-	static void deleteEntry(){
+	static private void deleteEntry(){
 		System.out.println("Enter the title of the post you wish to delete...");
 		String title = in.nextLine();
 		Entry temp = eManager.getEntry(title);
 		tManager.removeTags(temp.getTagsArray());
 		uManager.deleteUserEntry(uManager.getUser(temp.getOwner()), temp);
 		eManager.deleteEntry(temp);
+	}
+	
+	static private void newSub(){
+		System.out.println("Enter the type of subscription:");
+		String type = in.nextLine();
+		String var;
+		switch(type){
+		case "tag":
+			System.out.println("Enter tag:");
+			var = in.nextLine();
+			sManager.createSub(var, loggedUser, type);
+			break;
+		case "user":
+			System.out.println("Enter user:");
+			var = in.nextLine();
+			sManager.createSub(var, loggedUser, type);
+			break;
+		case "group":
+			System.out.println("Enter group:");
+			var = in.nextLine();
+			sManager.createSub(var, loggedUser, type);
+			break;
+		}
 	}
 }
 

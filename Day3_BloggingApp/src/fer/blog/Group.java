@@ -1,10 +1,13 @@
+package fer.blog;
 
 public class Group {
 	private Long id;
 	private String name;
 
 	Group(String _name, Long _id){
-		this.name = _name;
+		if(_name.equals(""))
+			throw new IllegalArgumentException("Group name can't be empty");
+		name = _name;
 		this.id = _id;
 	}
 	
@@ -17,6 +20,8 @@ public class Group {
 	}
 	
 	public void setName(String _name){
+		if(_name.equals(""))
+			throw new IllegalArgumentException("Group name can't be empty");
 		name = _name;
 	}
 }

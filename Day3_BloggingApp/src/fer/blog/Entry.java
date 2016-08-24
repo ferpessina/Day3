@@ -1,3 +1,4 @@
+package fer.blog;
 // Implements Blog entries
 import java.util.*;
 import java.text.DateFormat;
@@ -12,18 +13,29 @@ public class Entry {
 	private Set<String> tags = new HashSet<>();
 	private Long entryId;
 	
-	Entry(String new_title,String new_text,Date new_date,String[] new_tags, Long id, String owner){
+	Entry(String new_title,String new_text,String new_tags, Long id, String owner){
+		if(new_title.equals(""))
+			throw new IllegalArgumentException("Title can't be empty");
 		title = new_title;
-		text = new_text;
-		date = new_date;
-		for(int i=0;i<new_tags.length;i++){
-			tags.add(new_tags[i]);
+		if(new_text == null){
+			text = "";
+		}else{
+			text = new_text;
+		}
+		date = new Date();
+		if(new_tags != null){
+			String[] _tags = new_tags.split("\\s+");
+			Arrays.asList(_tags).stream().forEach(t -> {if(!t.equals("")){tags.add(t);}});
 		}
 		entryId = id;
+		if(owner.equals(""))
+			throw new IllegalArgumentException("Creator name can't be empty");
 		ownerName = owner;
 	}
 	
 	public void setTitle(String new_title){
+		if(new_title.equals(""))
+			throw new IllegalArgumentException("Title can't be empty");
 		title = new_title;
 	}
 	
@@ -32,7 +44,10 @@ public class Entry {
 	}
 	
 	public void setDate(Date new_date){
-		date = new_date;
+		if(new_date == null)
+			date = new Date();
+		else
+			date = new_date;
 	}
 	
 	public String getTitle(){
@@ -55,18 +70,35 @@ public class Entry {
 		return ownerName;
 	}
 	
-	public void addTag(String tag){
-		tags.add(tag);
+	public void addTag(String tag){ //If spaces are present splits into multiple tags and adds.
+		if(tag != null){
+			String[] _tags = tag.split("\\s+");
+			Arrays.asList(_tags).stream().forEach(t -> tags.add(t));
+		}
 	}
 	
 	public boolean hasTag(String tag){
-		boolean res = false;
-		res = tags.contains(tag);
-		return res;
+		if(tag == null){
+			return false;
+		}
+		if(!tag.equals("")){
+	        for(int i = 0; i < tag.length(); i++){
+	            if(Character.isWhitespace(tag.charAt(i))){
+	                throw new IllegalArgumentException("Must not contain whitespaces");
+	            }
+	        }
+	        boolean res = false;
+			res = tags.contains(tag);
+			return res;
+	    }
+		return false;
 	}
 	
 	public void removeTag(String tag){
-		tags.remove(tag);
+		if(tag != null){
+			String[] _tags = tag.split("\\s+");
+			Arrays.asList(_tags).stream().forEach(t -> tags.remove(t));
+		}
 	}
 	
 	public ArrayList<String> getTags(){
@@ -89,5 +121,14 @@ public class Entry {
 		DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 		System.out.println("Created by \""+ownerName+"\" on: "+dateFormat.format(date));
 		System.out.println("Tags: "+tags);
+	}
+	
+	public String[] toStringArray(){
+		DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+		StringBuilder builder = new StringBuilder();
+		tags.stream().forEach(t -> builder.append(t+" "));
+		String array[] = {title, text, dateFormat.format(date), builder.toString().trim() ,ownerName};
+		
+		return array;
 	}
 }

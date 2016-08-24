@@ -1,5 +1,5 @@
+package fer.blog;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class GroupManager{
 	private Map<Group,Set<String>> groups = new HashMap<>();
@@ -17,6 +17,7 @@ public class GroupManager{
 	}
 
 	public int addGroupUser(Group group, User user){
+		user.joinGroup(group);
 		String userName = user.getName();
 		if(group!=null){
 			Set<String> users = groups.get(group);
@@ -37,9 +38,9 @@ public class GroupManager{
 		groups.forEach( (k,v) -> v.remove(userName));
 	}
 	
-	public int removeGroupUser(String groupName, User user){
+	public int removeGroupUser(Group group, User user){
 		String userName = user.getName();
-		Group group = getGroupByName(groupName);
+		user.leaveGroup(group);
 		if(group!=null){
 			Set<String> users = groups.get(group);
 			if(users!=null){
@@ -91,8 +92,7 @@ public class GroupManager{
 		return ret;
 	}
 	
-	public Set<String> getMembers(String member){
-		Set<Group> _groups = groups.keySet().stream().filter(g -> groups.get(g).contains(member)).collect(Collectors.toCollection(HashSet::new));
+	public Set<String> getMembers(Set<Group> _groups){
 		Set<String> members = new HashSet<>();
 		Iterator<Group> iterator = _groups.iterator(); 
 		while (iterator.hasNext()){
